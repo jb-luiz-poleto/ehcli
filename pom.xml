@@ -77,6 +77,16 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <requiresUnpack>
+                        <dependency>
+                            <groupId>org.terracotta</groupId>
+                            <artifactId>terracotta-toolkit-1.6-runtime</artifactId>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sf.ehcache</groupId>
+                            <artifactId>ehcache-terracotta</artifactId>
+                        </dependency>
+                    </requiresUnpack>
                 </configuration>
             </plugin>
         </plugins>

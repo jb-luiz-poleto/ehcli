@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.config.InvalidConfigurationException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.shell.standard.ShellComponent;
@@ -30,28 +31,41 @@ public class CacheService {
 
     @ShellMethod(value = "Connect to a Cache")
     public void connect(String cacheName) {
-        userCodeCache = manager.getCache(cacheName);
+        Cache newCache = manager.getCache(cacheName);
+
+        if (newCache == null) {
+            throw new InvalidConfigurationException("Cache " + cacheName + " doesn't exsits.");
+        }
+
+        userCodeCache = newCache;
     }
 
+    /**
+     * Should have the following caches:
+     * AuthenticationToken
+     * AgentMessage
+     * MessageToRevive
+     * MessageId
+     * TFACode
+     * Lock
+     * WhiteListIpCache
+     * agentIdLocationRegistry
+     * nodeToAgentServicesInstanceRegistry
+     */
     @ShellMethod(value = "List available caches", key = "show")
     public String listCaches() {
-        return "AuthenticationToken" +
-                '\n' +
-                "AgentMessage" +
-                '\n' +
-                "MessageToRevive" +
-                '\n' +
-                "MessageId" +
-                '\n' +
-                "TFACode" +
-                '\n' +
-                "Lock" +
-                '\n' +
-                "WhiteListIpCache" +
-                '\n';
+        String[] cacheNames = manager.getCacheNames();
+
+        StringBuilder sb = new StringBuilder();
+        for (String s : cacheNames) {
+            sb.append(s);
+            sb.append('\n');
+        }
+
+        return sb.toString();
     }
 
-    @ShellMethod(value = "Get all keys from cache", key = "allkeys")
+    @ShellMethod(value = "Get all keys from cache", key = "keys")
     public String getKeys() {
         StringBuilder keys = new StringBuilder();
 
@@ -63,7 +77,7 @@ public class CacheService {
         return keys.toString();
     }
 
-    @ShellMethod(value = "Get all keys from cache that match the given regexp (Java style)", key = "keys")
+    @ShellMethod(value = "Get all keys from cache that match the given regexp (Java style)", key = "key")
     public String getMatchingKeys(String regexp) {
         Pattern pattern = Pattern.compile(regexp);
         StringBuilder keys = new StringBuilder();
@@ -80,10 +94,10 @@ public class CacheService {
     }
 
     @ShellMethod(value = "Get value for a given key", key = "get")
-    public String getValue(String key) {
+    public Object getValue(String key) {
         Element element = userCodeCache.get(key);
         if (element != null) {
-            return (String) element.getObjectValue();
+            return element.getObjectValue();
         } else {
             return "Key " + key + " not found";
         }
@@ -104,10 +118,6 @@ public class CacheService {
         } else {
             return "Key " + key + " not found in cache.";
         }
-    }
-
-    private boolean checkConnection() {
-        return userCodeCache == null;
     }
 
 }
