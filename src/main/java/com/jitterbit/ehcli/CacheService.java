@@ -103,6 +103,29 @@ public class CacheService {
         }
     }
 
+    @ShellMethod(value = "Get the TTL for a given key", key = "ttl")
+    public String getTtl(String key) {
+        Element cachedResult = userCodeCache.get(key);
+        if (cachedResult != null) {
+            long expiration = cachedResult.getTimeToIdle();
+            int ttl =  cachedResult.getTimeToLive();
+
+            return String.format("Time to Idle: %d, Time to Live: %d", expiration, ttl);
+        } else {
+            return "Key not found";
+        }
+    }
+
+    @ShellMethod(value = "Check if a key is expired", key = "exp")
+    public String getExpired(String key) {
+        Element cachedResult = userCodeCache.get(key);
+        if (cachedResult != null) {
+            return String.format("Key expired: %b", cachedResult.isExpired());
+        } else {
+            return "Key not found";
+        }
+    }
+
     @ShellMethod(value = "Put a key and value in the cache", key = "put")
     public void putValue(String key, String value) {
         Element element = new Element(key, value);

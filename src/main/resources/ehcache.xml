@@ -143,5 +143,6 @@
         </terracotta>
     </cache>
     <terracottaConfig url="localhost:9510" rejoin="true"/>
+<!--    <terracottaConfig url="green-terracotta.qa.jitterbit.cloud:9510,green-amq-broker.qa.jitterbit.cloud:9510" rejoin="true"/>-->
     <!-- See http://ehcache.sourceforge.net/documentation/#mozTocId258426 for how to configure caching for your objects -->
 </ehcache>

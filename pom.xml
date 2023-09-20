@@ -11,7 +11,7 @@
 
     <groupId>com.jitterbit</groupId>
     <artifactId>ehcli</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
     <name>ehcli</name>
     <description>Ehcache command line client</description>
 
