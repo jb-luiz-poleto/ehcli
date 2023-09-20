@@ -12,6 +12,9 @@ import org.springframework.shell.standard.ShellMethod;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,24 +106,44 @@ public class CacheService {
         }
     }
 
-    @ShellMethod(value = "Get the TTL for a given key", key = "ttl")
+    @ShellMethod(value = "Get retention statistics for a given key", key = "ret")
     public String getTtl(String key) {
         Element cachedResult = userCodeCache.get(key);
         if (cachedResult != null) {
-            long expiration = cachedResult.getTimeToIdle();
+            long expirationTime = cachedResult.getExpirationTime();
+            long creationTime = cachedResult.getCreationTime();
+            long updatedTime = cachedResult.getLastUpdateTime();
+            long accessTime = cachedResult.getLastAccessTime();
+            boolean isExpired = cachedResult.isExpired();
+            long timeToIdle = cachedResult.getTimeToIdle();
             int ttl =  cachedResult.getTimeToLive();
 
-            return String.format("Time to Idle: %d, Time to Live: %d", expiration, ttl);
-        } else {
-            return "Key not found";
-        }
-    }
+            StringBuilder sb = new StringBuilder();
+            sb.append("Retention Statistics:")
+                    .append(System.lineSeparator())
+                    .append("\tExpiration Time: ")
+                    .append(formatTimestamp(expirationTime))
+                    .append(System.lineSeparator())
+                    .append("\tCreation Time: ")
+                    .append(formatTimestamp(creationTime))
+                    .append(System.lineSeparator())
+                    .append("\tUpdate Time: ")
+                    .append(formatTimestamp(updatedTime))
+                    .append(System.lineSeparator())
+                    .append("\tLast Access Time: ")
+                    .append(formatTimestamp(accessTime))
+                    .append(System.lineSeparator())
+                    .append("\tIs Expired: ")
+                    .append(isExpired)
+                    .append(System.lineSeparator())
+                    .append("\tTTL (seconds): ")
+                    .append(ttl)
+                    .append(System.lineSeparator())
+                    .append("\tTime To Idle (seconds): ")
+                    .append(timeToIdle)
+                    .append(System.lineSeparator());
 
-    @ShellMethod(value = "Check if a key is expired", key = "exp")
-    public String getExpired(String key) {
-        Element cachedResult = userCodeCache.get(key);
-        if (cachedResult != null) {
-            return String.format("Key expired: %b", cachedResult.isExpired());
+            return sb.toString();
         } else {
             return "Key not found";
         }
@@ -141,6 +164,10 @@ public class CacheService {
         } else {
             return "Key " + key + " not found in cache.";
         }
+    }
+
+    private String formatTimestamp(long timestamp) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), TimeZone.getDefault().toZoneId()).toString();
     }
 
 }
