@@ -1,11 +1,11 @@
 package com.jitterbit.ehcli;
 
+import com.jitterbit.ehcli.EhcliApplication.TCConfig;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.InvalidConfigurationException;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -26,8 +26,8 @@ public class CacheService {
     private final CacheManager manager;
     private Cache userCodeCache;
 
-    public CacheService() throws IOException {
-        Resource resource = new ClassPathResource("ehcache.xml");
+    public CacheService(TCConfig tcConfig) throws IOException {
+        Resource resource = tcConfig.getConfig();
         InputStream input = resource.getInputStream();
         manager = CacheManager.newInstance(input);
     }
